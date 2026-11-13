@@ -1,0 +1,38 @@
+table dim_state
+	lineageTag: f61ca8ad-246f-4033-9f87-1c4ff1dd9cb7
+	sourceLineageTag: [gold].[dim_state]
+
+	column state_code
+		dataType: string
+		lineageTag: f17f7abb-4a48-48dd-bf7a-67bb1e314c66
+		sourceLineageTag: state_code
+		summarizeBy: none
+		sourceColumn: state_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column state_name
+		dataType: string
+		lineageTag: b175577a-31ca-4db1-994f-4625468ce3b5
+		sourceLineageTag: state_name
+		summarizeBy: none
+		sourceColumn: state_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column region
+		dataType: string
+		lineageTag: 43ec2a48-95d7-4f52-b643-6514e4338089
+		sourceLineageTag: region
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_state = entity
+		mode: directLake
+		source
+			entityName: dim_state
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_bank'
+

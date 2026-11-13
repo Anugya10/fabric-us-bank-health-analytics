@@ -1,0 +1,192 @@
+table fact_bank_quarter
+	lineageTag: bd18302b-3d6a-4cc1-898d-45cde2d82f61
+	sourceLineageTag: [gold].[fact_bank_quarter]
+
+	column cert
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d4462d5c-487e-4947-94ec-c13c9e0b2a49
+		sourceLineageTag: cert
+		summarizeBy: none
+		sourceColumn: cert
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column date_key
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: 8ce25f84-b2cb-4570-a413-745af3ebda52
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column state_code
+		dataType: string
+		isHidden
+		lineageTag: f636df63-ca7e-4d65-9e98-c562c7262208
+		sourceLineageTag: state_code
+		summarizeBy: none
+		sourceColumn: state_code
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column total_assets
+		dataType: double
+		lineageTag: 5469c9d2-6041-4eee-ad71-527b719fb491
+		sourceLineageTag: total_assets
+		summarizeBy: sum
+		sourceColumn: total_assets
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_deposits
+		dataType: double
+		lineageTag: 9a64d050-bcd4-41fd-a1a3-a23300116d2a
+		sourceLineageTag: total_deposits
+		summarizeBy: sum
+		sourceColumn: total_deposits
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_loans
+		dataType: double
+		lineageTag: 3de9e58f-3a28-4dc9-8a80-3da98c6c831d
+		sourceLineageTag: net_loans
+		summarizeBy: sum
+		sourceColumn: net_loans
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_equity
+		dataType: double
+		lineageTag: 36e718d1-ca6a-4e95-a2c4-a797a5a70a56
+		sourceLineageTag: total_equity
+		summarizeBy: sum
+		sourceColumn: total_equity
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column noncurrent_loans
+		dataType: double
+		lineageTag: d24cd5ea-5b15-4338-a869-8fed033c1f44
+		sourceLineageTag: noncurrent_loans
+		summarizeBy: sum
+		sourceColumn: noncurrent_loans
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_income_ytd
+		dataType: double
+		lineageTag: e3e8c3b2-5179-4eed-ac0f-b0609a9ce6b0
+		sourceLineageTag: net_income_ytd
+		summarizeBy: sum
+		sourceColumn: net_income_ytd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_income_qtr
+		dataType: double
+		lineageTag: ae275536-bb10-4604-82be-43c6859c1fc9
+		sourceLineageTag: net_income_qtr
+		summarizeBy: sum
+		sourceColumn: net_income_qtr
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column roa_pct
+		dataType: double
+		lineageTag: 95c1a4c7-b644-43d6-b544-2dbdc3e3c977
+		sourceLineageTag: roa_pct
+		summarizeBy: sum
+		sourceColumn: roa_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column roe_pct
+		dataType: double
+		lineageTag: 735cfccd-7ba0-4157-8a21-ac7b273a7499
+		sourceLineageTag: roe_pct
+		summarizeBy: sum
+		sourceColumn: roe_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nim_pct
+		dataType: double
+		lineageTag: 1d527054-d677-402b-9dc9-c80491e94a0b
+		sourceLineageTag: nim_pct
+		summarizeBy: sum
+		sourceColumn: nim_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column noncurrent_loan_ratio
+		dataType: double
+		lineageTag: 5db9447c-043a-441a-b5c0-ded6e55bb009
+		sourceLineageTag: noncurrent_loan_ratio
+		summarizeBy: sum
+		sourceColumn: noncurrent_loan_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column equity_to_assets
+		dataType: double
+		lineageTag: 976a3e09-535f-4117-a762-8b0192be75b0
+		sourceLineageTag: equity_to_assets
+		summarizeBy: sum
+		sourceColumn: equity_to_assets
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column loans_to_deposits
+		dataType: double
+		lineageTag: 26cfc427-9588-40c4-9c46-d43136ca1d19
+		sourceLineageTag: loans_to_deposits
+		summarizeBy: sum
+		sourceColumn: loans_to_deposits
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_bank_quarter = entity
+		mode: directLake
+		source
+			entityName: fact_bank_quarter
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_bank'
+

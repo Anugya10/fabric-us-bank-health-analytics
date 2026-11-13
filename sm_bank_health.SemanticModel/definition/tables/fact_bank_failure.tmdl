@@ -1,0 +1,101 @@
+table fact_bank_failure
+	lineageTag: 6c6933b3-7169-49de-bf7d-ca76829c36d4
+	sourceLineageTag: [gold].[fact_bank_failure]
+
+	column cert
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f447fd58-da9b-4f50-842b-c1fa38e5a19e
+		sourceLineageTag: cert
+		summarizeBy: none
+		sourceColumn: cert
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column bank_name
+		dataType: string
+		lineageTag: c7c60e20-78b4-4e97-a04a-8766c3f97593
+		sourceLineageTag: bank_name
+		summarizeBy: none
+		sourceColumn: bank_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column fail_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: d46b3a15-8e00-418c-90e8-25c7c36a164c
+		sourceLineageTag: fail_date
+		summarizeBy: none
+		sourceColumn: fail_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column date_key
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: 5f42869f-36e2-4f6e-bf39-29cdeb3fb5fa
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column state_code
+		dataType: string
+		isHidden
+		lineageTag: d2f4944e-086e-430a-aa54-14c7101aafe3
+		sourceLineageTag: state_code
+		summarizeBy: none
+		sourceColumn: state_code
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column assets_at_failure
+		dataType: double
+		lineageTag: bb87fcd8-5aa8-4e61-bd62-c917b7a73f42
+		sourceLineageTag: assets_at_failure
+		summarizeBy: sum
+		sourceColumn: assets_at_failure
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column estimated_cost
+		dataType: double
+		lineageTag: a06577b0-2b0f-4d8e-9e78-0b646c6e2a5a
+		sourceLineageTag: estimated_cost
+		summarizeBy: sum
+		sourceColumn: estimated_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cost_to_assets_ratio
+		dataType: double
+		lineageTag: 602add16-fcd2-4b3f-85db-f2fc36d0459e
+		sourceLineageTag: cost_to_assets_ratio
+		summarizeBy: sum
+		sourceColumn: cost_to_assets_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_bank_failure = entity
+		mode: directLake
+		source
+			entityName: fact_bank_failure
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_bank'
+

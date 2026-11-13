@@ -1,0 +1,73 @@
+table dim_date
+	lineageTag: a5c2fc61-19d1-40dc-b3f4-7a632a4a80a8
+	sourceLineageTag: [gold].[dim_date]
+
+	column date_key
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: bcab9943-dd65-4cf9-8ab7-c608ce28445b
+		sourceLineageTag: date_key
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: a9c4b798-bd78-4b1d-840f-1b3ee291a892
+		sourceLineageTag: year
+		summarizeBy: sum
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: cd4feff2-ddb2-4a90-a84d-37426581e18e
+		sourceLineageTag: quarter
+		summarizeBy: sum
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column quarter_label
+		dataType: string
+		lineageTag: 282fc1fc-e60b-4076-9eb3-5e171e77350a
+		sourceLineageTag: quarter_label
+		summarizeBy: none
+		sourceColumn: quarter_label
+		sortByColumn: quarter_sort
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column quarter_sort
+		dataType: int64
+		formatString: 0
+		lineageTag: bce277b6-77e0-4d00-b56a-b848d3d3e871
+		sourceLineageTag: quarter_sort
+		summarizeBy: sum
+		sourceColumn: quarter_sort
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_latest_quarter
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 85f2e40e-1048-4838-ac53-40c9677d68fb
+		sourceLineageTag: is_latest_quarter
+		summarizeBy: none
+		sourceColumn: is_latest_quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_bank'
+

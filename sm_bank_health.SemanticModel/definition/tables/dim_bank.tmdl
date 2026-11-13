@@ -1,0 +1,116 @@
+table dim_bank
+	lineageTag: dc46fc50-06d8-4013-aed2-142b4050e653
+	sourceLineageTag: [gold].[dim_bank]
+
+	column cert
+		dataType: int64
+		formatString: 0
+		lineageTag: d54c9dad-49f2-4519-92b0-ddb0e6fa0fe0
+		sourceLineageTag: cert
+		summarizeBy: none
+		sourceColumn: cert
+
+		annotation SummarizationSetBy = Automatic
+
+	column bank_name
+		dataType: string
+		lineageTag: 4daed789-ce5e-4f2c-8108-b91930af927e
+		sourceLineageTag: bank_name
+		summarizeBy: none
+		sourceColumn: bank_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 6e921ee5-5867-42de-966f-b61535642ee0
+		sourceLineageTag: city
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column state_code
+		dataType: string
+		lineageTag: aa56e773-10f6-4c76-a1f8-f816bc5c693b
+		sourceLineageTag: state_code
+		summarizeBy: none
+		sourceColumn: state_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column charter_class
+		dataType: string
+		lineageTag: e45261ea-d0d2-4cb7-8050-46ff621ad3d9
+		sourceLineageTag: charter_class
+		summarizeBy: none
+		sourceColumn: charter_class
+
+		annotation SummarizationSetBy = Automatic
+
+	column charter_type
+		dataType: string
+		lineageTag: 0ee5f6c6-a2b6-4883-948c-6208c9ac98db
+		sourceLineageTag: charter_type
+		summarizeBy: none
+		sourceColumn: charter_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_active
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 9112effd-f590-4c73-8b10-812d4c942840
+		sourceLineageTag: is_active
+		summarizeBy: none
+		sourceColumn: is_active
+
+		annotation SummarizationSetBy = Automatic
+
+	column established_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: fa5b2ca7-d3a8-4a42-b606-80d984ef73c5
+		sourceLineageTag: established_date
+		summarizeBy: none
+		sourceColumn: established_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column latest_total_assets
+		dataType: double
+		lineageTag: 93e9a1d0-84ae-45e8-9b3a-e5815be46639
+		sourceLineageTag: latest_total_assets
+		summarizeBy: sum
+		sourceColumn: latest_total_assets
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column size_band
+		dataType: string
+		lineageTag: 929c5105-480c-4006-863c-8c0c9f5aa772
+		sourceLineageTag: size_band
+		summarizeBy: none
+		sourceColumn: size_band
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_failed
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 89c2443e-d817-43fd-ab97-57680223d42b
+		sourceLineageTag: has_failed
+		summarizeBy: none
+		sourceColumn: has_failed
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_bank = entity
+		mode: directLake
+		source
+			entityName: dim_bank
+			schemaName: gold
+			expressionSource: 'DirectLake - lh_bank'
+

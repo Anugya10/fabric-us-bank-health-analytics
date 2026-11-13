@@ -1,0 +1,11 @@
+expression 'DirectLake - lh_bank' =
+		let
+		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/e8e3a7f2-9a9b-4ab5-b74b-bc0933da2da8/ed2d451f-7951-4e5c-83a4-2615447a7a78", [HierarchicalNavigation=true])
+		in
+		    Source
+	lineageTag: 0af9f534-1710-40d2-850a-12c33d6c87c7
+
+	annotation PBI_IncludeFutureArtifacts = False
+
+	annotation PBI_RemovedChildren = [{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[silver].[institutions]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[silver].[bank_financials]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[silver].[failures]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[silver].[dq_log]"}},"objectType":"Table"}]
+

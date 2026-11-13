@@ -1,0 +1,24 @@
+relationship ea4bba19-1343-fc26-22da-88f9eaa426f9
+	fromColumn: fact_bank_quarter.cert
+	toColumn: dim_bank.cert
+
+relationship cee86819-a03f-5d59-1ff0-30ad41260f76
+	fromColumn: fact_bank_quarter.date_key
+	toColumn: dim_date.date_key
+
+relationship 354db6b9-7862-6e90-3375-af3a834c7986
+	fromColumn: fact_bank_failure.state_code
+	toColumn: dim_state.state_code
+
+relationship 80a98f57-6f3f-4b03-7e85-72dd0dab32ba
+	fromColumn: fact_bank_failure.cert
+	toColumn: dim_bank.cert
+
+relationship 66550394-7b14-ba6c-16ba-a9d38e35a008
+	fromColumn: fact_bank_failure.date_key
+	toColumn: dim_date.date_key
+
+relationship 0c5535b2-d3ec-7e9b-7995-ff85dd984401
+	fromColumn: fact_bank_quarter.state_code
+	toColumn: dim_state.state_code
+
