@@ -18,3 +18,6 @@ ref table dim_state
 ref table fact_bank_failure
 ref table fact_bank_quarter
 
+ref role 'Northeast Analyst'
+ref role 'Texas Analyst'
+

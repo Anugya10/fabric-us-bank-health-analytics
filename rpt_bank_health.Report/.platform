@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "rpt_bank_health"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "84f9f83d-1b03-abbd-44df-98b7eba1d12a"
+  }
+}

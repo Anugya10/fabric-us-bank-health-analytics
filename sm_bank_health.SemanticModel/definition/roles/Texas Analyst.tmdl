@@ -1,0 +1,7 @@
+role 'Texas Analyst'
+	modelPermission: read
+
+	tablePermission dim_state = [state_code] == "TX"
+
+	annotation PBI_Id = 8cc468cef4334d2889fe63232f660fff
+

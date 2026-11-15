@@ -1,0 +1,7 @@
+role 'Northeast Analyst'
+	modelPermission: read
+
+	tablePermission dim_state = [region] == "Northeast"
+
+	annotation PBI_Id = 558a2559a85f45fab688f009dc86c48b
+

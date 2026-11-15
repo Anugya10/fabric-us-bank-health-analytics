@@ -2,6 +2,173 @@ table fact_bank_quarter
 	lineageTag: bd18302b-3d6a-4cc1-898d-45cde2d82f61
 	sourceLineageTag: [gold].[fact_bank_quarter]
 
+	measure 'Total Assets' = ```
+			
+			VAR LastQ = MAX ( fact_bank_quarter[date_key] )          -- latest quarter in the current filter
+			RETURN 
+			   CALCULATE(SUM(fact_bank_quarter[total_assets] ), 
+			                  fact_bank_quarter[date_key] = LastQ)
+			```
+		lineageTag: 5cdc94c0-8bb6-4646-8865-dab3775fca47
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Deposits' = ```
+			
+			VAR LastQ = MAX(fact_bank_quarter[date_key])
+			RETURN 
+			   CALCULATE (SUM(fact_bank_quarter[total_deposits]), 
+			                  fact_bank_quarter[date_key] = LastQ )
+			```
+		lineageTag: 7fe80fcd-4785-4440-b55a-20a655e4634c
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Net Loans' = ```
+			
+			VAR LastQ = MAX(fact_bank_quarter[date_key])
+			RETURN CALCULATE(SUM(fact_bank_quarter[net_loans]), 
+			                     fact_bank_quarter[date_key] = LastQ)
+			```
+		lineageTag: 6ea70776-cab5-40fb-83c2-9c64a8422438
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Equity' = ```
+			
+			VAR LastQ = MAX(fact_bank_quarter[date_key])
+			RETURN CALCULATE(SUM(fact_bank_quarter[total_equity]), 
+			                     fact_bank_quarter[date_key] = LastQ)
+			```
+		lineageTag: 432e2132-5ae9-46ff-8af0-2024188e1d37
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Noncurrent Loans' = ```
+			
+			VAR LastQ = MAX(fact_bank_quarter[date_key])
+			RETURN CALCULATE(SUM(fact_bank_quarter[noncurrent_loans]), 
+			                       fact_bank_quarter[date_key] = LastQ)
+			```
+		lineageTag: c330b87d-1c12-422c-b374-a5bf403ba1dd
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bank Count' = ```
+			
+			VAR LastQ = MAX(fact_bank_quarter[date_key])
+			RETURN CALCULATE(DISTINCTCOUNT(fact_bank_quarter[cert]), 
+			                               fact_bank_quarter[date_key] = LastQ)
+			```
+		formatString: 0
+		lineageTag: 5889a4f2-117a-4648-87fb-61c39e7fd501
+
+		changedProperty = Name
+
+	measure 'Net Income' = SUM (fact_bank_quarter[net_income_qtr])
+		lineageTag: 63a3689a-2672-48ad-a231-ec1e621a0523
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bad Loan Ratio %' = DIVIDE ([Noncurrent Loans], [Net Loans])
+		lineageTag: 02d8d54d-d2be-4f7a-995f-79829ec11707
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Equity to Assets %' = DIVIDE ([Total Equity], [Total Assets])
+		lineageTag: 5456bc8d-1766-4e1e-9764-3ad6e68abe3d
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Loans to Deposits %' = DIVIDE ([Net Loans], [Total Deposits])
+		lineageTag: 797a6b70-6eaf-49f4-87a6-2c8e05f60e45
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'ROA %' = ```
+			
+			-- annualized: average quarterly profit x 4, divided by latest assets
+			VAR Quarters = DISTINCTCOUNT (fact_bank_quarter[date_key])
+			RETURN 
+			   DIVIDE (DIVIDE([Net Income], Quarters ) * 4, 
+			                  [Total Assets])
+			```
+		lineageTag: c13e99b9-0720-4b01-91a0-94b0a1a8b615
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Assets QoQ %' = ```
+			
+			VAR CurQ  = MAX ( fact_bank_quarter[date_key] )
+			VAR PrevQ = EOMONTH ( CurQ, -3 )               -- previous quarter end
+			VAR Prev  = CALCULATE ( SUM ( fact_bank_quarter[total_assets] ),
+			                        REMOVEFILTERS ( dim_date ), 
+									fact_bank_quarter[date_key] = PrevQ )
+			RETURN 
+			    DIVIDE ([Total Assets] - Prev, Prev )
+			```
+		lineageTag: dfb6a2e0-c0f5-4d08-bdd7-1944bc44b581
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Bad Loan Ratio YoY Change' = ```
+			
+			VAR CurQ  = MAX ( fact_bank_quarter[date_key] )
+			VAR PrevY = EOMONTH ( CurQ, -12 )                        -- same quarter last year
+			VAR PrevRatio = CALCULATE ( [Bad Loan Ratio %], REMOVEFILTERS ( dim_date ),
+			                            fact_bank_quarter[date_key] = PrevY )
+			RETURN 
+			    [Bad Loan Ratio %] - PrevRatio                   -- format as % (percentage-point change)
+			```
+		lineageTag: 7873cab3-3966-4187-98b5-af24ad9cc3dd
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Health Status' =
+			
+			VAR Eq  = [Equity to Assets %]
+			VAR Bad = [Bad Loan Ratio %]
+			VAR Roa = [ROA %]
+			RETURN
+			SWITCH ( TRUE (),
+			    ISBLANK ( Eq ), BLANK (),
+			    Eq < 0.06 || Bad > 0.03  || Roa < 0,     "Red",
+			    Eq < 0.08 || Bad > 0.015 || Roa < 0.005, "Amber",
+			    "Green" )
+		lineageTag: e736018d-e189-42f9-aea9-0df5e0c50289
+
+		changedProperty = Name
+
+	measure 'Banks at Risk' = COUNTROWS (FILTER( VALUES(dim_bank[cert]), [Health Status] = "Red"))
+		formatString: 0
+		lineageTag: 0f23252f-08e9-4e7e-bde7-59b0cf613c63
+
+		changedProperty = Name
+
 	column cert
 		dataType: int64
 		isHidden

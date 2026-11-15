@@ -2,6 +2,26 @@ table fact_bank_failure
 	lineageTag: 6c6933b3-7169-49de-bf7d-ca76829c36d4
 	sourceLineageTag: [gold].[fact_bank_failure]
 
+	measure 'Failed Banks' = COUNTROWS ( fact_bank_failure )
+		formatString: 0
+		lineageTag: c89062d5-54d2-4b12-994a-94b731211391
+
+		changedProperty = Name
+
+	measure 'Failed Bank Assets' = SUM(fact_bank_failure[assets_at_failure])
+		lineageTag: 926dc3e1-a7ea-438d-aa4f-72bf4e83e4ac
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Failure Cost' = SUM (fact_bank_failure[estimated_cost])
+		lineageTag: 4ec9cd45-8a05-4214-8da6-96ab19091d4a
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column cert
 		dataType: int64
 		isHidden
