@@ -28,12 +28,14 @@ table fact_bank_quarter
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'Net Loans' = ```
+	measure 'Net Loans' =
 			
-			VAR LastQ = MAX(fact_bank_quarter[date_key])
-			RETURN CALCULATE(SUM(fact_bank_quarter[net_loans]), 
-			                     fact_bank_quarter[date_key] = LastQ)
-			```
+			VAR LastQ = MAX ( fact_bank_quarter[date_key] )   -- latest quarter in the current filter
+			RETURN
+			    CALCULATE (
+			        SUM ( fact_bank_quarter[net_loans] ),
+			        fact_bank_quarter[date_key] = LastQ          -- keep only that quarter
+			    )
 		lineageTag: 6ea70776-cab5-40fb-83c2-9c64a8422438
 
 		changedProperty = Name
@@ -166,6 +168,13 @@ table fact_bank_quarter
 	measure 'Banks at Risk' = COUNTROWS (FILTER( VALUES(dim_bank[cert]), [Health Status] = "Red"))
 		formatString: 0
 		lineageTag: 0f23252f-08e9-4e7e-bde7-59b0cf613c63
+
+		changedProperty = Name
+
+	measure 'Health Color' =
+			
+			SWITCH ([Health Status], "Red", "#D64545", "Amber", "#F2A93B", "Green", "#2E9E5B")
+		lineageTag: c4adc4e4-ba4b-498f-8d02-beb3d61a4074
 
 		changedProperty = Name
 
