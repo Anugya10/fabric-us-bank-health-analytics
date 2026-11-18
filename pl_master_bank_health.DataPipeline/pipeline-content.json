@@ -1,0 +1,185 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "45c575e2-f81a-b516-4f47-e07142d24c32",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "start_year": {
+              "value": "2019",
+              "type": "int"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Ingest FDIC",
+        "dependsOn": []
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "912df1a9-ec51-8c68-4206-847d1aa81681",
+          "workspaceId": "00000000-0000-0000-0000-000000000000"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Build Silver",
+        "dependsOn": [
+          {
+            "activity": "Ingest FDIC",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "dbd31f17-df43-a088-48cb-f5e03f6020f0",
+          "workspaceId": "00000000-0000-0000-0000-000000000000"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Build Gold",
+        "dependsOn": [
+          {
+            "activity": "Build Silver",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "PBISemanticModelRefresh",
+        "typeProperties": {
+          "method": "POST",
+          "groupId": "00000000-0000-0000-0000-000000000000",
+          "datasetId": "cb30d7e7-2f60-a132-44b9-06620844282b",
+          "commitMode": "Transactional",
+          "waitOnCompletion": true,
+          "operationType": "SemanticModelRefresh"
+        },
+        "externalReferences": {
+          "connection": "6e860e78-ff5e-4ea7-86c5-bf7c6828d659"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Refresh Model",
+        "dependsOn": [
+          {
+            "activity": "Build Gold",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Office365Email",
+        "typeProperties": {
+          "body": "<p>Pipeline @{pipeline().PipelineName} failed at the Silver step. Run ID: @{pipeline().RunId}</p>",
+          "to": "AnugyaSinghal@alizah012.onmicrosft.com",
+          "subject": "Bank Health pipeline FAILED"
+        },
+        "externalReferences": {
+          "connection": "da9b88a5-c07d-4325-8257-b542447b3515"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Email - Silver failed",
+        "dependsOn": [
+          {
+            "activity": "Build Silver",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Office365Email",
+        "typeProperties": {
+          "body": "<p>Pipeline @{pipeline().PipelineName} failed at the Ingest step. Run ID: @{pipeline().RunId}</p>",
+          "to": "AnugyaSinghal@alizah012.onmicrosft.com",
+          "subject": "Bank Health pipeline FAILED"
+        },
+        "externalReferences": {
+          "connection": "da9b88a5-c07d-4325-8257-b542447b3515"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Email - Ingest failed",
+        "dependsOn": [
+          {
+            "activity": "Ingest FDIC",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Office365Email",
+        "typeProperties": {
+          "body": "<p>Pipeline @{pipeline().PipelineName} failed at the Gold step. Run ID: @{pipeline().RunId}</p>",
+          "to": "AnugyaSinghal@alizah012.onmicrosft.com",
+          "subject": "Bank Health pipeline FAILED"
+        },
+        "externalReferences": {
+          "connection": "da9b88a5-c07d-4325-8257-b542447b3515"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Email - Gold Failed",
+        "dependsOn": [
+          {
+            "activity": "Build Gold",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
