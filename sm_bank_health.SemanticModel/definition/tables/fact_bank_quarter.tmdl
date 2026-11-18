@@ -105,14 +105,15 @@ table fact_bank_quarter
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	measure 'ROA %' = ```
+	measure 'ROA %' =
 			
-			-- annualized: average quarterly profit x 4, divided by latest assets
-			VAR Quarters = DISTINCTCOUNT (fact_bank_quarter[date_key])
-			RETURN 
-			   DIVIDE (DIVIDE([Net Income], Quarters ) * 4, 
-			                  [Total Assets])
-			```
+			AVERAGEX (
+			    VALUES ( fact_bank_quarter[date_key] ),                                   -- loop over each quarter in the filter
+			    DIVIDE (
+			        CALCULATE ( SUM ( fact_bank_quarter[net_income_qtr] ) ) * 4,          -- that quarter's profit, annualised
+			        CALCULATE ( SUM ( fact_bank_quarter[total_assets] ) )                 -- that same quarter's assets
+			    )
+			)
 		lineageTag: c13e99b9-0720-4b01-91a0-94b0a1a8b615
 
 		changedProperty = Name
@@ -156,16 +157,21 @@ table fact_bank_quarter
 			VAR Bad = [Bad Loan Ratio %]
 			VAR Roa = [ROA %]
 			RETURN
-			SWITCH ( TRUE (),
-			    ISBLANK ( Eq ), BLANK (),
-			    Eq < 0.06 || Bad > 0.03  || Roa < 0,     "Red",
-			    Eq < 0.08 || Bad > 0.015 || Roa < 0.005, "Amber",
-			    "Green" )
+			IF ( ISBLANK ( [Total Assets] ), BLANK (),                     -- no data → no status
+			    SWITCH ( TRUE (),
+			        Eq < 0.06 || Bad > 0.03 || Roa < 0, "Red",
+			        Eq < 0.08 || Bad > 0.015 || Roa < 0.005, "Amber",
+			        "Green" ) )
 		lineageTag: e736018d-e189-42f9-aea9-0df5e0c50289
 
 		changedProperty = Name
 
-	measure 'Banks at Risk' = COUNTROWS (FILTER( VALUES(dim_bank[cert]), [Health Status] = "Red"))
+	measure 'Banks at Risk' =
+			
+			VAR LastQ = MAX ( fact_bank_quarter[date_key] )
+			VAR ActiveBanks =
+			    CALCULATETABLE ( VALUES ( fact_bank_quarter[cert] ), fact_bank_quarter[date_key] = LastQ )  -- banks reporting in latest quarter
+			RETURN COUNTROWS ( FILTER ( ActiveBanks, [Health Status] = "Red" ) ) + 0
 		formatString: 0
 		lineageTag: 0f23252f-08e9-4e7e-bde7-59b0cf613c63
 
@@ -175,6 +181,127 @@ table fact_bank_quarter
 			
 			SWITCH ([Health Status], "Red", "#D64545", "Amber", "#F2A93B", "Green", "#2E9E5B")
 		lineageTag: c4adc4e4-ba4b-498f-8d02-beb3d61a4074
+
+		changedProperty = Name
+
+	measure 'Insight Page 1' =
+			
+			VAR FirstQ = MIN ( fact_bank_quarter[date_key] )          -- first quarter in the selection
+			VAR LastQ  = MAX ( fact_bank_quarter[date_key] )          -- last quarter in the selection
+			VAR BanksStart  = CALCULATE ( DISTINCTCOUNT ( fact_bank_quarter[cert] ), fact_bank_quarter[date_key] = FirstQ )
+			VAR BanksEnd    = CALCULATE ( DISTINCTCOUNT ( fact_bank_quarter[cert] ), fact_bank_quarter[date_key] = LastQ )
+			VAR AssetsStart = CALCULATE ( SUM ( fact_bank_quarter[total_assets] ), fact_bank_quarter[date_key] = FirstQ )
+			VAR AssetsEnd   = CALCULATE ( SUM ( fact_bank_quarter[total_assets] ), fact_bank_quarter[date_key] = LastQ )
+			VAR BankChg   = DIVIDE ( BanksEnd - BanksStart, BanksStart )     -- % change in bank count
+			VAR AssetChg  = DIVIDE ( AssetsEnd - AssetsStart, AssetsStart )  -- % change in assets
+			VAR AvgStart  = DIVIDE ( AssetsStart, BanksStart )               -- average bank size, start
+			VAR AvgEnd    = DIVIDE ( AssetsEnd, BanksEnd )                   -- average bank size, end
+			VAR LtD       = DIVIDE ( [Net Loans], [Total Deposits] )         -- loans-to-deposits
+			RETURN
+			"• From Q" & QUARTER ( FirstQ ) & " " & YEAR ( FirstQ ) & " to Q" & QUARTER ( LastQ ) & " " & YEAR ( LastQ )
+			    & ", the number of banks changed " & FORMAT ( BankChg, "0.0%" )
+			    & " (" & FORMAT ( BanksStart, "#,0" ) & " → " & FORMAT ( BanksEnd, "#,0" ) & ")"
+			    & " while total assets grew " & FORMAT ( AssetChg, "0.0%" ) & "."
+			& UNICHAR ( 10 ) &
+			"• The average bank grew from $" & FORMAT ( AvgStart / 1e9, "0.0" ) & "B to $" & FORMAT ( AvgEnd / 1e9, "0.0" )
+			    & "B, so the industry is consolidating into fewer, bigger banks."
+			& UNICHAR ( 10 ) &
+			"• Banks lend out " & FORMAT ( LtD, "0%" ) & " of deposits, hold "
+			    & FORMAT ( [Equity to Assets %], "0.0%" ) & " equity, and only "
+			    & FORMAT ( [Bad Loan Ratio %], "0.00%" ) & " of loans are bad, so the system looks well capitalised."
+		lineageTag: 9b0df936-4f08-4996-a82a-2d211b9238ff
+
+		changedProperty = Name
+
+	measure 'Insight Page 2' =
+			
+			VAR Roa = [ROA %]                                                         -- overall ROA for the selection
+			VAR BestRegion =
+			    MAXX ( TOPN ( 1, ALLSELECTED ( dim_state[region] ), [ROA %], DESC ), dim_state[region] )   -- region with highest ROA
+			VAR BestRegionRoa = CALCULATE ( [ROA %], dim_state[region] = BestRegion )
+			VAR BigRoa   = CALCULATE ( [ROA %], dim_bank[size_band] = "5. Over $100B" )   -- largest banks
+			VAR SmallRoa = CALCULATE ( [ROA %], dim_bank[size_band] = "1. Under $100M" )  -- smallest banks
+			VAR YearsWithData = FILTER ( VALUES ( dim_date[year] ), NOT ISBLANK ( [ROA %] ) )   -- only years that have data
+			VAR WorstYear = MAXX ( TOPN ( 1, YearsWithData, [ROA %], ASC ), dim_date[year] )  -- weakest year
+			VAR BestYear  = MAXX ( TOPN ( 1, YearsWithData, [ROA %], DESC ), dim_date[year] ) -- strongest year
+			RETURN
+			"• Banks earned an annualised " & FORMAT ( Roa, "0.00%" ) & " on their assets in this period."
+			& UNICHAR ( 10 ) &
+			"• " & BestRegion & " is the most profitable region at " & FORMAT ( BestRegionRoa, "0.00%" ) & " ROA."
+			& UNICHAR ( 10 ) &
+			"• Banks over $100B earn " & FORMAT ( BigRoa, "0.00%" ) & " vs " & FORMAT ( SmallRoa, "0.00%" )
+			    & " for banks under $100M, so scale drives profitability."
+			& UNICHAR ( 10 ) &
+			"• Weakest year: " & WorstYear & ". Strongest year: " & BestYear & "."
+		lineageTag: d9b85d33-076c-4774-b666-d6ab62b8e77c
+
+		changedProperty = Name
+
+	measure 'Insight Page 3' =
+			
+			VAR LastQ   = MAX ( fact_bank_quarter[date_key] )
+			VAR BadNow  = [Bad Loan Ratio %]
+			VAR BadPrev = CALCULATE ( [Bad Loan Ratio %], REMOVEFILTERS ( dim_date ),
+			                          fact_bank_quarter[date_key] = EOMONTH ( LastQ, -12 ) )     -- same quarter last year
+			VAR Active  = CALCULATE ( DISTINCTCOUNT ( fact_bank_quarter[cert] ), fact_bank_quarter[date_key] = LastQ )
+			VAR Risk    = [Banks at Risk]
+			VAR WorstState =
+			    MAXX ( TOPN ( 1, FILTER ( ALLSELECTED ( dim_state[state_name] ), [Total Assets] > 1e10 ),
+			                  [Bad Loan Ratio %], DESC ), dim_state[state_name] )
+			RETURN
+			"• " & FORMAT ( BadNow, "0.00%" ) & " of loans are non-performing, vs " & FORMAT ( BadPrev, "0.00%" ) & " a year earlier."
+			& UNICHAR ( 10 ) & "• " & Risk & " of " & FORMAT ( Active, "#,0" ) & " banks (" & FORMAT ( DIVIDE ( Risk, Active ), "0.0%" )
+			    & ") are flagged Red on capital, asset quality or profitability."
+			& UNICHAR ( 10 ) & "• " & WorstState & " has the highest bad loan ratio among the larger states."
+		lineageTag: aba8d6ed-b956-4cfc-9dcc-a9f3186fd6aa
+
+		changedProperty = Name
+
+	measure 'Peer ROA %' =
+			
+			VAR Band = SELECTEDVALUE ( dim_bank[size_band] )                       -- size band of the selected bank
+			RETURN CALCULATE ( [ROA %], REMOVEFILTERS ( dim_bank ), dim_bank[size_band] = Band )   -- all banks of that size
+		lineageTag: 5f391189-27de-4bd3-b573-3ebd79b661c9
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Peer Bad Loan %' =
+			
+			VAR Band = SELECTEDVALUE ( dim_bank[size_band] )
+			RETURN CALCULATE ( [Bad Loan Ratio %], REMOVEFILTERS ( dim_bank ), dim_bank[size_band] = Band )
+		lineageTag: 212af8de-6861-46c4-bb80-2af1b8d9a4bf
+
+		changedProperty = Name
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Insight Page 4' =
+			
+			IF ( NOT HASONEVALUE ( dim_bank[cert] ), "Select one bank to see its scorecard.",
+			    "• " & SELECTEDVALUE ( dim_bank[bank_name] ) & " (" & SELECTEDVALUE ( dim_bank[state_code] ) & ") has $"
+			        & FORMAT ( [Total Assets] / 1e9, "#,0.0" ) & "B in assets and is rated " & [Health Status] & "."
+			    & UNICHAR ( 10 ) & "• ROA " & FORMAT ( [ROA %], "0.00%" ) & " vs " & FORMAT ( [Peer ROA %], "0.00%" )
+			        & " for banks of the same size."
+			    & UNICHAR ( 10 ) & "• Bad loans " & FORMAT ( [Bad Loan Ratio %], "0.00%" ) & " vs "
+			        & FORMAT ( [Peer Bad Loan %], "0.00%" ) & " for peers." )
+		lineageTag: 5205e14a-9bf1-47f9-b609-a39a7a1ce565
+
+		changedProperty = Name
+
+	measure 'Insight Page 5' =
+			
+			VAR PeakYear  = MAXX ( TOPN ( 1, VALUES ( dim_date[year] ), [Failed Banks], DESC ), dim_date[year] )  -- worst year
+			VAR PeakCount = CALCULATE ( [Failed Banks], dim_date[year] = PeakYear )
+			VAR Biggest   = MAXX ( TOPN ( 1, VALUES ( fact_bank_failure[bank_name] ), [Failed Bank Assets], DESC ),
+			                       fact_bank_failure[bank_name] )                                            -- largest failure
+			RETURN
+			"• " & FORMAT ( [Failed Banks], "#,0" ) & " banks failed in this period, costing the FDIC about $"
+			    & FORMAT ( [Failure Cost] / 1e9, "#,0.0" ) & "B."
+			& UNICHAR ( 10 ) & "• The worst year was " & PeakYear & " with " & FORMAT ( PeakCount, "#,0" ) & " failures."
+			& UNICHAR ( 10 ) & "• The largest failure by assets was " & Biggest & "."
+		lineageTag: d84b8312-2ddb-49b3-b61d-cca924687ea7
 
 		changedProperty = Name
 

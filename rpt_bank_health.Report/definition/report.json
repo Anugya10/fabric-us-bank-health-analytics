@@ -50,6 +50,17 @@
           "type": "BaseTheme"
         }
       ]
+    },
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "Screenshot_2026-11-18_182314026006922593756032.png",
+          "path": "Screenshot_2026-11-18_182314026006922593756032.png",
+          "type": "Image"
+        }
+      ]
     }
   ],
   "settings": {
@@ -59,5 +70,6 @@
     "allowChangeFilterTypes": true,
     "useEnhancedTooltips": true,
     "useDefaultAggregateDisplayName": true
-  }
+  },
+  "linguisticSchemaSyncVersion": 0
 }

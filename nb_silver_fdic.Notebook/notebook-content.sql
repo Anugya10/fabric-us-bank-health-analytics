@@ -143,7 +143,8 @@ SELECT
     CAST(COST     AS DOUBLE) * 1000                 AS estimated_cost,
     current_timestamp()                             AS _loaded_at
 FROM raw_failures
-WHERE load_date = (SELECT MAX(load_date) FROM raw_failures);
+WHERE load_date = (SELECT MAX(load_date) FROM raw_failures)
+  AND RESTYPE = 'FAILURE';      -- NEW: keep real failures only, drop 593 open-bank assistance rows (e.g. Citi, BofA 2008-09)
 
 CREATE OR REPLACE TABLE silver.failures AS SELECT * FROM fail_clean;
 
@@ -194,6 +195,19 @@ FROM dq_checks WHERE rule = 'keys_not_null';
 SELECT 'institutions' AS table_name, COUNT(*) AS row_count FROM inst_clean
 UNION ALL SELECT 'bank_financials', COUNT(*) FROM fin_clean
 UNION ALL SELECT 'failures',        COUNT(*) FROM fail_clean;
+
+-- METADATA ********************
+
+-- META {
+-- META   "language": "sparksql",
+-- META   "language_group": "synapse_pyspark"
+-- META }
+
+-- CELL ********************
+
+SELECT RESTYPE, COUNT(*) AS cnt
+FROM raw_failures
+GROUP BY RESTYPE;
 
 -- METADATA ********************
 
