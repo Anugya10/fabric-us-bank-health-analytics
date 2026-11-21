@@ -89,7 +89,7 @@ The critical check raises an error, which stops the pipeline before bad data rea
 | Industry Overview | KPIs, asset growth vs shrinking bank count |
 | Profitability | ROA over time, by region and by size band, net income by year |
 | Risk | Risk-quadrant scatter (bad loans vs capital by state), riskiest banks with health colours |
-| Bank Scorecard | One bank vs size-band peers. Drillthrough target from the Risk page |
+| Bank Scorecard | One bank vs size-band peers. Drill-through target from the Risk page |
 | Failures | Failures by year and state, largest failures since 1934 |
 
 ### 6. Orchestration: `pl_master_bank_health`
