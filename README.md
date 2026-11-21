@@ -98,16 +98,16 @@ The critical check raises an error, which stops the pipeline before bad data rea
 ![Industry Overview](Page-1.png)
 
 **Profitability**
-![Profitability](Screenshot%202026-11-22%20003906.png)
+![Profitability](Page-2.png)
 
 **Risk**
-![Risk](Screenshot%202026-11-22%20003924.png)
+![Risk](Page-3.png)
 
 **Bank Scorecard**
-![Bank Scorecard](Screenshot%202026-11-22%20003939.png)
+![Bank Scorecard](Page-4.png)
 
 **Failures**
-![Failures](Screenshot%202026-11-22%20003955.png)
+![Failures](Page-5.png)
 
 ### 6. Orchestration: `pl_master_bank_health`
 `Ingest FDIC → Build Silver → Build Gold → Refresh Model`
