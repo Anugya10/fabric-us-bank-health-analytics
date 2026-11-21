@@ -1,8 +1,8 @@
 # US Bank Health Analytics: Microsoft Fabric End-to-End Project
 
-An end-to-end analytics solution on **Microsoft Fabric** that tracks the health of every FDIC-insured bank in the United States: size, profitability, asset quality, capital strength and failures. It runs from live API ingestion to an interactive Power BI report.
+An end-to-end analytics solution on **Microsoft Fabric** that tracks the health of every FDIC-insured bank in the United States: size, profitability, asset quality, capital strength, and failures. It runs from live API ingestion to an interactive Power BI report.
 
-![Architecture](docs/architecture.png)
+![Architecture](architecture.png)
 
 ---
 
