@@ -169,7 +169,13 @@ UNION ALL SELECT 'bank_financials', 'state_code_valid',
 UNION ALL SELECT 'bank_financials', 'cert_exists_in_institutions',
        (SELECT COUNT(*) FROM fin_typed f LEFT ANTI JOIN inst_clean i ON f.cert = i.cert),
        (SELECT COUNT(*) FROM fin_typed)
-UNION ALL SELECT 'failures', 'fail_date_parsed', COUNT_IF(fail_date IS NULL), COUNT(*) FROM fail_clean;
+UNION ALL SELECT 'failures', 'fail_date_parsed', COUNT_IF(fail_date IS NULL), COUNT(*) FROM fail_clean
+-- Check 8: warn if FDIC sends a RESTYPE we don't know about.
+-- Our filter keeps only FAILURE, so any new type would be silently dropped without this check.
+UNION ALL SELECT 'failures', 'restype_expected_values',
+       COUNT_IF(RESTYPE IS NULL OR RESTYPE NOT IN ('FAILURE', 'ASSISTANCE')), COUNT(*)
+FROM raw_failures
+WHERE load_date = (SELECT MAX(load_date) FROM raw_failures);
 
 -- Save this run's results (latest run; each pipeline run's history stays in the Monitor hub)
 CREATE OR REPLACE TABLE silver.dq_log AS
